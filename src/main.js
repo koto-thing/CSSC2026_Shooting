@@ -17,6 +17,10 @@ async function main() {
     
     // シーンマネージャーを作成
     const sceneManager = new SceneManager(game.stage);
+    game.onResize(({ width, height }) => {
+        sceneManager.resize(width, height);
+    });
+
     sceneManager.register("title", () => new TitleScene({ sceneManager, assetManager }));
     sceneManager.register("game", () => new GameScene({ sceneManager, assetManager }));
     

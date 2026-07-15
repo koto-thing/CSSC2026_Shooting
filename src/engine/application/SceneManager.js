@@ -4,6 +4,10 @@
         this.sceneFactories = new Map();
         this.currentScene = null;
         this.nextSceneName = null;
+        this.viewport = {
+            width: stage.canvas.width,
+            height: stage.canvas.height,
+        };
     }
     
     register(name, factory) {
@@ -30,6 +34,12 @@
         
         this.currentScene?.tick(deltaTime);
     }
+
+    resize(width, height) {
+        this.viewport.width = width;
+        this.viewport.height = height;
+        this.currentScene?.resize(width, height);
+    }
     
     applySceneChange() {
         if (this.currentScene !== null) {
@@ -43,6 +53,7 @@
         this.currentScene = factory();
         this.nextSceneName = null;
         
+        this.currentScene.resize(this.viewport.width, this.viewport.height);
         this.stage.addChild(this.currentScene.root);
         this.currentScene.enter();
     }

@@ -1,6 +1,18 @@
 ﻿export class Scene {
     constructor() {
         this.root = new createjs.Container();
+        this.viewport = {
+            width: 0,
+            height: 0,
+        };
+    }
+
+    get width() {
+        return this.viewport.width;
+    }
+
+    get height() {
+        return this.viewport.height;
     }
     
     enter() {
@@ -13,6 +25,11 @@
     
     exit() {
         // シーン終了時
+    }
+
+    resize(width, height) {
+        this.viewport.width = width;
+        this.viewport.height = height;
     }
     
     dispose() {

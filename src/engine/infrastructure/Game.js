@@ -13,11 +13,56 @@ export class Game {
 
         this.isRunning = false;
         this.tickHandler = null;
+        this.resizeListeners = new Set();
+        this.resizeHandler = () => {
+            this.resizeCanvas();
+        };
 
         createjs.Ticker.framerate = 60;
         createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
 
+        window.addEventListener("resize", this.resizeHandler);
+        this.resizeCanvas();
+
         Input.initialize(canvas);
+    }
+
+    get width() {
+        return this.canvas.width;
+    }
+
+    get height() {
+        return this.canvas.height;
+    }
+
+    onResize(listener) {
+        this.resizeListeners.add(listener);
+        listener({
+            width: this.width,
+            height: this.height,
+        });
+
+        return () => {
+            this.resizeListeners.delete(listener);
+        };
+    }
+
+    resizeCanvas() {
+        const width = Math.max(1, Math.floor(window.innerWidth));
+        const height = Math.max(1, Math.floor(window.innerHeight));
+
+        if (this.canvas.width === width && this.canvas.height === height) {
+            return;
+        }
+
+        this.canvas.width = width;
+        this.canvas.height = height;
+
+        for (const listener of this.resizeListeners) {
+            listener({ width, height });
+        }
+
+        this.stage.update();
     }
 
     start(updateCallback) {
@@ -57,8 +102,10 @@ export class Game {
     dispose() {
         this.stop();
         Input.dispose();
+        window.removeEventListener("resize", this.resizeHandler);
 
         this.stage.removeAllChildren();
         this.stage.removeAllEventListeners();
+        this.resizeListeners.clear();
     }
 }

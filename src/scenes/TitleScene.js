@@ -9,14 +9,11 @@ export class TitleScene extends Scene {
 
         this.titleText = null;
         this.startText = null;
+        this.background = null;
     }
 
     enter() {
-        const background = new createjs.Shape();
-
-        background.graphics
-            .beginFill("#202030")
-            .drawRect(0, 0, 500, 300);
+        this.background = new createjs.Shape();
 
         this.titleText = new createjs.Text(
             "SIMPLE SHOOTING",
@@ -25,8 +22,6 @@ export class TitleScene extends Scene {
         );
 
         this.titleText.textAlign = "center";
-        this.titleText.x = 250;
-        this.titleText.y = 80;
 
         this.startText = new createjs.Text(
             "CLICK TO START",
@@ -35,8 +30,6 @@ export class TitleScene extends Scene {
         );
 
         this.startText.textAlign = "center";
-        this.startText.x = 250;
-        this.startText.y = 190;
         this.startText.cursor = "pointer";
 
         this.startText.on("click", () => {
@@ -44,10 +37,12 @@ export class TitleScene extends Scene {
         });
 
         this.root.addChild(
-            background,
+            this.background,
             this.titleText,
             this.startText,
         );
+
+        this.layout();
     }
 
     tick() {
@@ -59,5 +54,27 @@ export class TitleScene extends Scene {
 
     exit() {
         console.log("Exiting TitleScene");
+    }
+
+    resize(width, height) {
+        super.resize(width, height);
+        this.layout();
+    }
+
+    layout() {
+        if (this.background === null) {
+            return;
+        }
+
+        this.background.graphics
+            .clear()
+            .beginFill("#202030")
+            .drawRect(0, 0, this.width, this.height);
+
+        this.titleText.x = this.width / 2;
+        this.titleText.y = this.height * 0.3;
+
+        this.startText.x = this.width / 2;
+        this.startText.y = this.height * 0.65;
     }
 }
