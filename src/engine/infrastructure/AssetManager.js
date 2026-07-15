@@ -1,4 +1,7 @@
 ﻿export class AssetManager {
+    /**
+     * コンストラクタ
+     */
     constructor() {
         this.queue = new createjs.LoadQueue();
         this.manifest = [];
@@ -6,7 +9,11 @@
         
         this.queue.installPlugin(createjs.Sound);
     }
-    
+
+    /**
+     * アセットを登録する
+     * @param assetList {Array} アセットのリスト
+     */
     register(assetList) {
         if (this.isLoaded) {
             throw new Error("Cannot register assets after loading has started.");
@@ -14,7 +21,11 @@
         
         this.manifest.push(...assetList);
     }
-    
+
+    /**
+     * アセットをロードする
+     * @returns {Promise<void>|Promise<unknown>}
+     */
     load() {
         if (this.isLoaded) {
             return Promise.resolve();
@@ -33,7 +44,12 @@
             this.queue.loadManifest(this.manifest);
         });
     }
-    
+
+    /**
+     * アセットを取得する
+     * @param id {string} アセットのID
+     * @returns {*}
+     */
     get(id) {
         if (!this.isLoaded) {
             throw new Error("Assets are not loaded yet.");

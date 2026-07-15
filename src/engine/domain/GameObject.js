@@ -1,6 +1,11 @@
 ﻿import { Transform } from "./Transform.js";
 
 export class GameObject {
+    /**
+     * コンストラクタ
+     * @param name {string} ゲームオブジェクトの名前
+     * @param view {object} ゲームオブジェクトのビュー（表示オブジェクト）
+     */
     constructor(name = "GameObject", view = null) {
         this.name = name;
         this.active = true;
@@ -20,7 +25,12 @@ export class GameObject {
         this.transform = new Transform(this.view);
         this.addComponent(this.transform);
     }
-    
+
+    /**
+     * ゲームオブジェクトにコンポーネントを追加する
+     * @param component {Component} 追加するコンポーネント
+     * @returns {*}
+     */
     addComponent(component) {
         if (this.destroyed) {
             throw new Error(`Cannot add component to destroyed GameObject "${this.name}".`);
@@ -36,23 +46,43 @@ export class GameObject {
         
         return component;
     }
-    
+
+    /**
+     * ゲームオブジェクトからコンポーネントを取得する
+     * @param ComponentType {function} 取得するコンポーネントの型
+     * @returns {*|null}
+     */
     getComponent(ComponentType) {
         return this.components.find(
             (component) => component instanceof ComponentType,
         ) ?? null;
     }
-    
+
+    /**
+     * ゲームオブジェクトから指定された型のすべてのコンポーネントを取得する
+     * @param ComponentType {function} 取得するコンポーネントの型
+     * @returns {*[]}
+     */
     getComponents(ComponentType) {
         return this.components.filter(
             (component) => component instanceof ComponentType,
         );
     }
-    
+
+    /**
+     * ゲームオブジェクトが指定された型のコンポーネントを持っているかどうかを確認する
+     * @param ComponentType {function} 確認するコンポーネントの型
+     * @returns {boolean} コンポーネントを持っているかどうか
+     */
     hasComponent(ComponentType) {
         return this.getComponent(ComponentType) !== null;
     }
-    
+
+    /**
+     * ゲームオブジェクトからコンポーネントを削除する
+     * @param componentOrType {Component|function} 削除するコンポーネントまたはその型
+     * @returns {boolean} 削除に成功したかどうか
+     */
     removeComponent(componentOrType) {
         const index = typeof componentOrType === "function" 
             ? this.components.findIndex((component) => component instanceof componentOrType)
@@ -71,7 +101,11 @@ export class GameObject {
         component.gameObject = null;
         return true;
     }
-    
+
+    /**
+     * ゲームオブジェクトを更新する
+     * @param deltaTime {number} 前のフレームからの経過時間（秒）
+     */
     tick(deltaTime) {
         if (!this.active || this.destroyed) {
             return;
@@ -90,7 +124,11 @@ export class GameObject {
             component.tick(deltaTime);
         }
     }
-    
+
+    /**
+     * ゲームオブジェクトの更新後に呼び出される
+     * @param deltaTime {number} 前のフレームからの経過時間（秒）
+     */
     lateTick(deltaTime) {
         if (!this.active || this.destroyed) {
             return;
@@ -102,12 +140,19 @@ export class GameObject {
             }
         }
     }
-    
+
+    /**
+     * ゲームオブジェクトのアクティブ状態を設定する
+     * @param active {boolean} アクティブ状態
+     */
     setActive(active) {
         this.active = active;
         this.view.visible = active;
     }
-    
+
+    /**
+     * ゲームオブジェクトを破棄する
+     */
     destroy() {
         if (this.destroyed) {
             return;

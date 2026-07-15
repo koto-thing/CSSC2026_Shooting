@@ -1,6 +1,10 @@
 import { Input } from "./Input.js";
 
 export class Game {
+    /**
+     * コンストラクタ
+     * @param canvasId {string} キャンバスのID
+     */
     constructor(canvasId) {
         const canvas = document.getElementById(canvasId);
 
@@ -27,14 +31,27 @@ export class Game {
         Input.initialize(canvas);
     }
 
+    /**
+     * ゲームの幅を取得する
+     * @returns {*}
+     */
     get width() {
         return this.canvas.width;
     }
 
+    /**
+     * ゲームの高さを取得する
+     * @returns {*}
+     */
     get height() {
         return this.canvas.height;
     }
 
+    /**
+     * ゲームのリサイズイベントを購読する
+     * @param listener {function({width: number, height: number}): void} リサイズイベントのリスナー
+     * @returns {(function(): void)|*} リスナーの購読を解除する関数
+     */
     onResize(listener) {
         this.resizeListeners.add(listener);
         listener({
@@ -47,6 +64,9 @@ export class Game {
         };
     }
 
+    /**
+     * ゲームのキャンバスをリサイズする
+     */
     resizeCanvas() {
         const width = Math.max(1, Math.floor(window.innerWidth));
         const height = Math.max(1, Math.floor(window.innerHeight));
@@ -65,6 +85,10 @@ export class Game {
         this.stage.update();
     }
 
+    /**
+     * ゲームを開始する
+     * @param updateCallback {function(number): void} 更新コールバック関数
+     */
     start(updateCallback) {
         if (this.isRunning) {
             return;
@@ -87,6 +111,9 @@ export class Game {
         createjs.Ticker.addEventListener("tick", this.tickHandler);
     }
 
+    /**
+     * ゲームを停止する
+     */
     stop() {
         if (!this.isRunning) {
             return;
@@ -99,6 +126,9 @@ export class Game {
         this.tickHandler = null;
     }
 
+    /**
+     * ゲームを破棄する
+     */
     dispose() {
         this.stop();
         Input.dispose();

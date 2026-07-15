@@ -1,4 +1,8 @@
-﻿export const KeyCode = Object.freeze({
+﻿/**
+ * キーコード一覧
+ * @type {Readonly<{A: string, B: string, C: string, D: string, E: string, F: string, G: string, H: string, I: string, J: string, K: string, L: string, M: string, N: string, O: string, P: string, Q: string, R: string, S: string, T: string, U: string, V: string, W: string, X: string, Y: string, Z: string, Digit0: string, Digit1: string, Digit2: string, Digit3: string, Digit4: string, Digit5: string, Digit6: string, Digit7: string, Digit8: string, Digit9: string, ArrowUp: string, ArrowDown: string, ArrowLeft: string, ArrowRight: string, Space: string, Enter: string, Escape: string, Tab: string, ShiftLeft: string, ShiftRight: string, ControlLeft: string, ControlRight: string, AltLeft: string, AltRight: string}>}
+ */
+export const KeyCode = Object.freeze({
     A: "KeyA",
     B: "KeyB",
     C: "KeyC",
