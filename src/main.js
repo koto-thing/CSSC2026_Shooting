@@ -5,6 +5,10 @@ import { TitleScene } from "./scenes/TitleScene.js";
 import { GameScene } from "./scenes/GameScene.js";
 import { assetList } from "./assets/AssetsList.js";
 
+/**
+ * ゲームを初期化してメインループを開始する
+ * @returns {Promise<void>}
+ */
 async function main() {
     // ゲーム本体を作成
     const game = new Game("gameCanvas");

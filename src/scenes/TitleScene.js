@@ -1,6 +1,8 @@
 import { Scene } from "../engine/index.js";
 
+/** タイトル画面の表示と入力を管理するシーン */
 export class TitleScene extends Scene {
+    /** タイトルシーンを初期化する */
     constructor({ sceneManager, assetManager }) {
         super();
 
@@ -12,6 +14,7 @@ export class TitleScene extends Scene {
         this.background = null;
     }
 
+    /** タイトル画面を構築して表示する */
     enter() {
         this.background = new createjs.Shape();
 
@@ -45,22 +48,28 @@ export class TitleScene extends Scene {
         this.layout();
     }
 
+    /** タイトル画面の入力を処理する */
     tick() {
         const alphaSpeed = 2;
 
         this.startText.alpha =
             0.5 + Math.sin(createjs.Ticker.getTime() / 1000 * alphaSpeed) * 0.5;
+        
+        window.addEventListener("mousedown", (e) => this.sceneManager.changeScene("game"));
     }
 
+    /** タイトル画面のイベントを解除して終了する */
     exit() {
         console.log("Exiting TitleScene");
     }
 
+    /** タイトル画面の表示領域を変更する */
     resize(width, height) {
         super.resize(width, height);
         this.layout();
     }
 
+    /** 現在の表示領域に合わせて要素を配置する */
     layout() {
         if (this.background === null) {
             return;

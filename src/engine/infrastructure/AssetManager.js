@@ -1,4 +1,5 @@
-﻿export class AssetManager {
+﻿/** ゲームで使用するアセットの登録、読み込み、取得を管理するクラス */
+export class AssetManager {
     /**
      * コンストラクタ
      */

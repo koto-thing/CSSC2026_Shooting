@@ -1,5 +1,6 @@
 ﻿import { Transform } from "./Transform.js";
 
+/** 表示オブジェクトと複数のコンポーネントを管理するゲームオブジェクト */
 export class GameObject {
     /**
      * コンストラクタ

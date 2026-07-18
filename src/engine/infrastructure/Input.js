@@ -1,4 +1,5 @@
-﻿export class Input {
+﻿/** キーボードとマウスの入力状態をフレーム単位で管理するクラス */
+export class Input {
     static #initialized = false;
 
     static #heldKeys = new Set();

@@ -1,4 +1,5 @@
-﻿export class SceneManager {
+﻿/** シーンの登録、切り替え、更新を管理するクラス */
+export class SceneManager {
     /**
      * コンストラクタ
      * @param stage {createjs.Stage} ゲームのステージ

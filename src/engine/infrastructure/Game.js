@@ -1,5 +1,6 @@
 import { Input } from "./Input.js";
 
+/** 描画ステージとゲームループを管理するクラス */
 export class Game {
     /**
      * コンストラクタ

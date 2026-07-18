@@ -1,4 +1,5 @@
-﻿export class Component {
+﻿/** GameObjectへ追加できる振る舞いの基底クラス */
+export class Component {
     /**
      * コンストラクタ
      */

@@ -1,5 +1,6 @@
 ﻿import { Component } from "./Component.js";
 
+/** ゲームオブジェクトの位置、回転、拡縮を管理するコンポーネント */
 export class Transform extends Component {
     /**
      * コンストラクタ
