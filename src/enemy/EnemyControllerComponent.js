@@ -1,8 +1,10 @@
-import { Component } from "../engine/index.js";
+import { Component, clamp } from "../engine/index.js";
 import { EnemyMovePatterns } from "./EnemyMovePatterns.js";
-import {EnemyShotPattern} from "./EnemyShotPatterns.js";
+import { EnemyShotPattern } from "./EnemyShotPatterns.js";
 
-/** 敵の移動と弾の発射を制御するコンポーネント */
+/** 
+ * 敵の移動と弾の発射を制御するコンポーネント
+ */
 export class EnemyControllerComponent extends Component {
     constructor({
         boundsProvider,
@@ -28,6 +30,9 @@ export class EnemyControllerComponent extends Component {
         
         this.age = 0;
         this.shotTimer = 0;
+        this.shotState = {
+            shotCount: 0,
+        };
         
         this.moveState = {
             initialized: false,
@@ -70,11 +75,43 @@ export class EnemyControllerComponent extends Component {
             ...this.moveConfig,
             moveSpeed: this.moveSpeed,
         });
+
+        this.#clampToPlayArea();
+    }
+
+    /** 
+     * 敵がUI領域へ侵入しないよう、プレイ領域を基準に移動を制限する 
+     */
+    #clampToPlayArea() {
+        if (this.boundsProvider === undefined) {
+            return;
+        }
+
+        const bounds = this.boundsProvider.playArea ?? {
+            x: 0,
+            y: 0,
+            width: this.boundsProvider.width,
+            height: this.boundsProvider.height,
+        };
+        const bottom = bounds.y + bounds.height;
+
+        this.transform.x = clamp(this.transform.x, bounds.x, bounds.x + bounds.width);
+
+        if (this.transform.y < bounds.y) {
+            return;
+        }
+
+        if (this.transform.y > bottom) {
+            this.gameObject.setActive(false);
+            return;
+        }
+
+        this.transform.y = clamp(this.transform.y, bounds.y, bottom);
     }
 
     /**
      * 弾を撃つ処理
-     * @param deltaTime
+     * @param deltaTime {number} 前回のフレームからの経過時間（秒）
      */
     #shot(deltaTime) {
         if (this.shotCooldown <= 0) {
@@ -94,6 +131,7 @@ export class EnemyControllerComponent extends Component {
         pattern(this.gameObject, {
             bulletManager: this.bulletManager,
             config: this.shotConfig,
+            state: this.shotState,
         })
     }
 }

@@ -5,6 +5,7 @@ export { Component } from "./domain/Component.js";
 export {
     CircleColliderComponent,
     ColliderComponent,
+    EllipseColliderComponent,
     RectangleColliderComponent,
 } from "./domain/ColliderComponent.js";
 export { GameObject } from "./domain/GameObject.js";

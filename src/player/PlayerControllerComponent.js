@@ -1,6 +1,8 @@
 import { Component, Input, KeyCode, Vector2, clamp } from "../engine/index.js";
 
-/** プレイヤーの移動、ショット、ボム入力を制御するコンポーネント */
+/** 
+ * プレイヤーの移動、ショット、ボム入力を制御するコンポーネント
+ */
 export class PlayerControllerComponent extends Component {
     /** プレイヤー操作コンポーネントを初期化する */
     constructor({ boundsProvider, onShot } = {}) {
@@ -77,10 +79,17 @@ export class PlayerControllerComponent extends Component {
         this.transform.x += direction.x * speed * deltaTime;
         this.transform.y += direction.y * speed * deltaTime;
         
-        // 画面の範囲内にクランプ
+        // プレイ領域の範囲内にクランプ
         if (this.boundsProvider !== undefined) {
-            this.transform.x = clamp(this.transform.x, 0, this.boundsProvider.width);
-            this.transform.y = clamp(this.transform.y, 0, this.boundsProvider.height);
+            const bounds = this.boundsProvider.playArea ?? {
+                x: 0,
+                y: 0,
+                width: this.boundsProvider.width,
+                height: this.boundsProvider.height,
+            };
+
+            this.transform.x = clamp(this.transform.x, bounds.x, bounds.x + bounds.width);
+            this.transform.y = clamp(this.transform.y, bounds.y, bounds.y + bounds.height);
         }
     }
 
@@ -93,12 +102,16 @@ export class PlayerControllerComponent extends Component {
             return;
         }
         
-        if (this.shotTimer > 0) {
-            return;
+        for (const shotSlot of this.gameObject.shotSlots) {
+            shotSlot.timer -= deltaTime;
+            
+            if (shotSlot.timer > 0) {
+                continue;
+            }
+            
+            shotSlot.timer = shotSlot.cooldown;
+            this.onShot?.(this.gameObject, shotSlot);
         }
-        
-        this.shotTimer = this.shotCooldown;
-        this.onShot?.(this.gameObject);
     }
 
     /**

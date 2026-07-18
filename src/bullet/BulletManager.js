@@ -1,15 +1,16 @@
-import { ColliderComponent, ObjectPool, Vector2 } from "../engine/index.js";
+import { ColliderComponent, ObjectPool } from "../engine/index.js";
 
 /**
  * 弾の管理を行うクラス
  */
 export class BulletManager {
     /** 弾管理クラスを初期化する */
-    constructor({ bulletFactory, root, playerProvider, enemyProvider } = {}) {
+    constructor({ bulletFactory, root, playerProvider, enemyProvider, onTargetDefeated } = {}) {
         this.bulletFactory = bulletFactory;
         this.root = root;
         this.playerProvider = playerProvider;
         this.enemyProvider = enemyProvider;
+        this.onTargetDefeated = onTargetDefeated;
 
         this.pool = new ObjectPool({
             createObject: () => this.createBullet(),
@@ -39,33 +40,6 @@ export class BulletManager {
     }
 
     /**
-     * 弾を発射する
-     * @param shooter {any} 弾を発射するオブジェクト（プレイヤーまたは敵）
-     * @returns {*} 発射された弾のオブジェクト
-     */
-    spawnFrom(shooter) {
-        if (shooter === this.playerProvider?.()) {
-            return this.spawnBullet({
-                owner: "player",
-                x: shooter.transform.x,
-                y: shooter.transform.y,
-                direction: Vector2.up(),
-                moveSpeed: 600,
-                damage: 1,
-            });
-        }
-        
-        return this.spawnBullet({
-            owner: "enemy",
-            x: shooter.transform.x,
-            y: shooter.transform.y,
-            direction: new Vector2(0, 1),
-            moveSpeed: 600,
-            damage: 1,
-        });
-    }
-
-    /**
      * 弾を作成する
      * @returns {*|Bullet} 作成された弾のオブジェクト
      */
@@ -85,9 +59,31 @@ export class BulletManager {
      * @param param0.direction
      * @param param0.moveSpeed
      * @param param0.damage
+     * @param param0.hitShape
+     * @param param0.hitWidth
+     * @param param0.hitHeight
+     * @param param0.visualType
+     * @param param0.visualConfig
      * @returns {*}
      */
-    spawnBullet({ owner, x, y, direction, moveSpeed, damage = 1 } = {}) {
+    spawnBullet(
+        { 
+            owner, 
+            x, 
+            y, 
+            direction, 
+            moveSpeed, 
+            damage = 1,
+            hitRadius = 4,
+            hitShape = "circle",
+            hitWidth,
+            hitHeight,
+            movePattern = "straight",
+            moveConfig = {},
+            visualType = "default",
+            visualConfig = {},
+        } = {}
+    ) {
         const bullet = this.pool.get();
         
         bullet.transform.x = x;
@@ -96,8 +92,16 @@ export class BulletManager {
         bullet.configure({
             owner,
             damage,
+            hitRadius,
+            hitShape,
+            hitWidth,
+            hitHeight,
             direction,
             moveSpeed,
+            movePattern,
+            moveConfig,
+            visualType,
+            visualConfig,
         });
         
         return bullet;
@@ -155,6 +159,7 @@ export class BulletManager {
 
         // ターゲットのHPが0以下になった場合はターゲットを非アクティブにする
         if (target.hp <= 0) {
+            this.onTargetDefeated?.(target);
             target.setActive(false);
         }
     }

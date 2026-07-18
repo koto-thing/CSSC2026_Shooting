@@ -1,6 +1,10 @@
-﻿/** ゲーム内の各シーンに共通するライフサイクルと表示領域を管理する基底クラス */
+﻿/** 
+ * ゲーム内の各シーンに共通するライフサイクルと表示領域を管理する基底クラス
+ */
 export class Scene {
-    /** シーンを初期化する */
+    /** 
+     * シーンを初期化する 
+     */
     constructor() {
         this.root = new createjs.Container();
         this.viewport = {
@@ -28,7 +32,7 @@ export class Scene {
     /**
      * シーンが開始されたときに呼び出される
      */
-    enter() {
+    Initialize() {
         // シーン開始時
     }
 

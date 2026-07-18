@@ -16,7 +16,7 @@
     
     /** 敵を指定したY座標まで下へ移動させる */
     stopAtY(enemy, deltaTime, state, config) {
-        const stopY = config.stopAtY ?? 120;
+        const stopY = config.stopAtY ?? config.stopY ?? 120;
         
         if (enemy.transform.y < stopY) {
             enemy.transform.y += config.moveSpeed * deltaTime;

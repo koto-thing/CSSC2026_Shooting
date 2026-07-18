@@ -1,6 +1,14 @@
-﻿/** ウェーブ設定に従って敵を出現させるクラス */
+﻿/** 
+ * ウェーブ設定に従って敵を出現させるクラス 
+ */
 export class EnemySpawner {
-    /** 敵スポーナーを初期化する */
+    /** 
+     * 敵スポーナーを初期化する
+     * @param {Object} param0
+     * @param {EnemyManager} param0.enemyManager
+     * @param {BoundsProvider} param0.boundsProvider
+     * @param {Array} param0.waves
+     */
     constructor({ enemyManager, boundsProvider, waves = [] } = {}) {
         this.enemyManager = enemyManager;
         this.boundsProvider = boundsProvider;
@@ -9,7 +17,10 @@ export class EnemySpawner {
         this.nextIndex = 0;
     }
     
-    /** 経過時間に応じてウェーブ内の敵を生成する */
+    /** 
+     * 経過時間に応じてウェーブ内の敵を生成する
+     * @param {number} deltaTime 前回のフレームからの経過時間（秒）
+     */
     tick(deltaTime) {
         this.elapsedTime += deltaTime;
         
@@ -19,17 +30,32 @@ export class EnemySpawner {
             this.waves[this.nextIndex].time <= this.elapsedTime
         ) {
             const wave = this.waves[this.nextIndex];
-            const x = wave.x ?? this.boundsProvider.width * (wave.xRatio ?? 0.5);
-            const y = wave.y ?? -40;
-            
-            this.enemyManager.spawn({
-                type: wave.type, 
-                x,
-                y,
-            });
+            const enemies = wave.enemies ?? [wave];
+
+            for (const enemy of enemies) {
+                this.#spawnEnemy(enemy);
+            }
             
             this.nextIndex++;
         }
+    }
+
+    /** 指定されたステージ定義から敵を1体生成する */
+    #spawnEnemy(enemy) {
+        const bounds = this.boundsProvider.playArea ?? {
+            x: 0,
+            y: 0,
+            width: this.boundsProvider.width,
+            height: this.boundsProvider.height,
+        };
+        const x = enemy.x ?? bounds.x + bounds.width * (enemy.xRatio ?? 0.5);
+        const y = enemy.y ?? bounds.y - 40;
+
+        this.enemyManager.spawn({
+            ...enemy,
+            x,
+            y,
+        });
     }
 
     /**

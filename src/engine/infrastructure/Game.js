@@ -9,13 +9,17 @@ export class Game {
     constructor(canvasId) {
         const canvas = document.getElementById(canvasId);
 
+        // キャンバスが見つからない場合はエラーを投げる
         if (!(canvas instanceof HTMLCanvasElement)) {
             throw new Error(`Canvas ${canvasId} not found`);
         }
 
+        // キャンバスのコンテキストが取得できない場合はエラーを投げる
         this.canvas = canvas;
-        this.stage = new createjs.Stage(canvas);
+        this.stage = new createjs.StageGL(canvas);
+        this.stage.clearColor = "#101010";
 
+        // ゲームループの状態を管理するフラグとハンドラ
         this.isRunning = false;
         this.tickHandler = null;
         this.resizeListeners = new Set();
@@ -23,12 +27,15 @@ export class Game {
             this.resizeCanvas();
         };
 
+        // Tickerのフレームレートを設定する
         createjs.Ticker.framerate = 60;
         createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
 
+        // ウィンドウのリサイズイベントを購読する
         window.addEventListener("resize", this.resizeHandler);
         this.resizeCanvas();
-
+        
+        // Inputを初期化する
         Input.initialize(canvas);
     }
 
@@ -78,6 +85,8 @@ export class Game {
 
         this.canvas.width = width;
         this.canvas.height = height;
+
+        this.stage.updateViewport?.(width, height);
 
         for (const listener of this.resizeListeners) {
             listener({ width, height });

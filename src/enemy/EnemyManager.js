@@ -16,13 +16,22 @@ export class EnemyManager {
         for (const enemy of this.enemies) {
             enemy.tick(deltaTime);
         }
-        
+
+        for (const enemy of this.enemies) {
+            if (!enemy.active) {
+                enemy.destroy();
+            }
+        }
+
         this.enemies = this.enemies.filter((enemy) => enemy.active);
     }
     
     /** 指定した種類と座標に敵を生成する */
-    spawn({ type = "normal", x, y }= {}) {
-        const enemyType = EnemyTypes[type] ?? EnemyTypes.normal;
+    spawn({ type = "normal", x, y, ...overrides }= {}) {
+        const enemyType = {
+            ...(EnemyTypes[type] ?? EnemyTypes.normal),
+            ...overrides,
+        };
         
         const enemy = new Enemy({
             boundsProvider: this.boundsProvider,

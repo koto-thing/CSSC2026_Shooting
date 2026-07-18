@@ -1,4 +1,6 @@
-﻿/** シーンの登録、切り替え、更新を管理するクラス */
+﻿/** 
+ * シーンの登録、切り替え、更新を管理するクラス 
+ */
 export class SceneManager {
     /**
      * コンストラクタ
@@ -81,6 +83,6 @@ export class SceneManager {
         
         this.currentScene.resize(this.viewport.width, this.viewport.height);
         this.stage.addChild(this.currentScene.root);
-        this.currentScene.enter();
+        this.currentScene.Initialize();
     }
 }

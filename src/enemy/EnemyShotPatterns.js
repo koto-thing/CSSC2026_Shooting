@@ -10,13 +10,36 @@ function directionFromAngle(degrees) {
     );
 }
 
+/**
+ * 敵弾のオプションを取得する
+ * @param context 敵弾に関するコンテキスト
+ * @returns {{damage, hitRadius, hitShape, hitWidth, hitHeight, visualType, visualConfig}}
+ */
+function enemyBulletOptions(context) {
+    return {
+        damage: context.config.bulletDamage ?? 1,
+        hitRadius: context.config.bulletHitRadius ?? 6,
+        hitShape: context.config.bulletHitShape ?? "circle",
+        hitWidth: context.config.bulletHitWidth,
+        hitHeight: context.config.bulletHitHeight,
+        visualType: context.config.bulletVisualType ?? "enemyBlueGlow",
+        visualConfig: context.config.bulletVisualConfig ?? {},
+    };
+}
+
 export const EnemyShotPattern = {
-    /** 弾を発射しない */
+    /** 
+     * 弾を発射しない
+     */
     none(enemy, context) {
         
     },
     
-    /** 真下へ1発の弾を発射する */
+    /** 
+     * 真下へ1発の弾を発射する
+     * @param enemy 敵のゲームオブジェクト
+     * @param context 敵弾に関するコンテキスト
+     */
     singleDown(enemy, context) {
         context.bulletManager.spawnBullet({
             owner: "enemy",
@@ -24,11 +47,15 @@ export const EnemyShotPattern = {
             y: enemy.transform.y,
             direction: new Vector2(0, 1),
             moveSpeed: context.config.bulletSpeed ?? 300,
-            damage: 1,
+            ...enemyBulletOptions(context),
         });
     }, 
     
-    /** 扇状に3発の弾を発射する */
+    /** 
+     * 扇状に3発の弾を発射する
+     * @param enemy 敵のゲームオブジェクト
+     * @param context 敵弾に関するコンテキスト
+     */
     fan3(enemy, context) {
         const speed = context.config.bulletSpeed ?? 300;
         const angles = [75, 90, 105];
@@ -40,12 +67,16 @@ export const EnemyShotPattern = {
                 y: enemy.transform.y,
                 direction: directionFromAngle(angle),
                 moveSpeed: speed,
-                damage: 1,
+                ...enemyBulletOptions(context),
             });
         }
     },
     
-    /** 全方向へ12発の弾を発射する */
+    /** 
+     * 全方向へ12発の弾を発射する
+     * @param enemy 敵のゲームオブジェクト
+     * @param context 敵弾に関するコンテキスト
+     */
     circle12(enemy, context) {
         const speed = context.config.bulletSpeed ?? 220;
         
@@ -58,7 +89,55 @@ export const EnemyShotPattern = {
                 y: enemy.transform.y,
                 direction: directionFromAngle(angle),
                 moveSpeed: speed, 
-                damage: 1,
+                ...enemyBulletOptions(context),
+            });
+        }
+    },
+
+    /**
+     * 全方向へ12発の弾を発射するが、angleを発射ごとに少しずつずらす
+     * @param enemy 敵のゲームオブジェクト
+     * @param context 敵弾に関するコンテキスト
+     */
+    circle12WithOffset(enemy, context) {
+        const speed = context.config.bulletSpeed ?? 220;
+        const offsetStep = context.config.angleOffsetStep ?? 15;
+        const offset = (context.state.shotCount * offsetStep) % 360;
+        
+        for (let i = 0; i < 12; i++) {
+            const angle = i * 30 + offset;
+            
+            context.bulletManager.spawnBullet({
+                owner: "enemy",
+                x: enemy.transform.x,
+                y: enemy.transform.y,
+                direction: directionFromAngle(angle),
+                moveSpeed: speed,
+                ...enemyBulletOptions(context),
+            });
+        }
+
+        context.state.shotCount++;
+    },
+
+    /**
+     * 全方向へ24発の弾を発射する
+     * @param enemy 敵のゲームオブジェクト
+     * @param context 敵弾に関するコンテキスト
+     */
+    circle24(enemy, context) {
+        const speed = context.config.bulletSpeed ?? 220;
+        
+        for (let i = 0; i < 24; i++) {
+            const angle = i * 15;
+            
+            context.bulletManager.spawnBullet({
+                owner: "enemy",
+                x: enemy.transform.x,
+                y: enemy.transform.y,
+                direction: directionFromAngle(angle),
+                moveSpeed: speed,
+                ...enemyBulletOptions(context),
             });
         }
     },
