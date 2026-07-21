@@ -27,6 +27,10 @@ function enemyBulletOptions(context) {
     };
 }
 
+/**
+ * 敵の弾の生成の仕方を定義している
+ * @type {{none(*, *), singleDown(*, *): void, fan3(*, *): void, circle12(*, *): void, circle12WithOffset(*, *): void, circle24(*, *): void}}
+ */
 export const EnemyShotPattern = {
     /** 
      * 弾を発射しない
@@ -99,12 +103,12 @@ export const EnemyShotPattern = {
      * @param enemy 敵のゲームオブジェクト
      * @param context 敵弾に関するコンテキスト
      */
-    circle12WithOffset(enemy, context) {
+    circle15WithOffset(enemy, context) {
         const speed = context.config.bulletSpeed ?? 220;
         const offsetStep = context.config.angleOffsetStep ?? 15;
         const offset = (context.state.shotCount * offsetStep) % 360;
         
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 15; i++) {
             const angle = i * 30 + offset;
             
             context.bulletManager.spawnBullet({

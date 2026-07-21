@@ -34,6 +34,7 @@ export class EnemyManager {
         };
         
         const enemy = new Enemy({
+            root: this.root,
             boundsProvider: this.boundsProvider,
             bulletManager: this.bulletManager,
             spawnPosition: { x, y },

@@ -51,5 +51,6 @@ export const Stage1 = {
         { time: 25.0, type: "burst", xRatio: 0.33, hp: 25, stopAtY: 105, shotCooldown: 1.0, bulletSpeed: 145 },
         { time: 25.6, type: "burst", xRatio: 0.67, hp: 25, stopAtY: 105, shotCooldown: 1.0, bulletSpeed: 145 },
         { time: 29.0, type: "shooter", xRatio: 0.5, hp: 10, stopAtY: 115, shotCooldown: 0.72, bulletSpeed: 300 },
+        { time: 30.0, type: "boss", xRatio: 0.5, hp: 3000, stopAtY: 115, shotCooldown: 1.0, bulletSpeed: 300 },
     ],
 };
