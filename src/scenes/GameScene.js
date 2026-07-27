@@ -50,6 +50,7 @@ export class GameScene extends Scene {
         this.gameplayMask = new createjs.Shape();
         this.gameplayBackground.view.mask = this.gameplayMask;
         this.gameplayLayer.mask = this.gameplayMask;
+        createjs.Sound.play("testAudio");
 
         this.root.addChild(this.background);
         this.root.addChild(this.gameplayBackground.view);
