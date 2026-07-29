@@ -40,5 +40,5 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: /game/cssc_game/
+          server-dir: /koto-thing-game/cssc_game/
           dangerous-clean-slate: false
