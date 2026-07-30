@@ -1,8 +1,8 @@
 ﻿export class SphereShaderFilter extends createjs.Filter {
-    constructor() {
-        super();
-        
-        this.FRAG_SHADER_BODY = `
+  constructor() {
+    super();
+
+    this.FRAG_SHADER_BODY = `
             void main() {
                 vec2 uv = vRenderCoord;
                 vec4 color = texture2D(uSampler, vRenderCoord);
@@ -23,5 +23,5 @@
                 gl_FragColor = vec4(color.rgb, color.a);
             }
         `;
-    }
+  }
 }

@@ -4,12 +4,12 @@
 
 ゲームには、いろいろな「もの」が登場する。
 
-* プレイヤー
-* 敵
-* 弾
-* アイテム
-* 背景
-* ボタン
+- プレイヤー
+- 敵
+- 弾
+- アイテム
+- 背景
+- ボタン
 
 これらをプログラムではまとめて`GameObject`と呼ぶ。
 
@@ -20,11 +20,11 @@
 
 たとえば、プレイヤーを作りたいなら次のように考える。
 
-* 位置を持つ部品
-* キーボードで動く部品
-* 画像を表示する部品
-* 当たり判定をする部品
-* 体力を持つ部品
+- 位置を持つ部品
+- キーボードで動く部品
+- 画像を表示する部品
+- 当たり判定をする部品
+- 体力を持つ部品
 
 このように、機能を小さな部品に分けて組み合わせる考え方が
 `GameObject - Component`システム。
@@ -45,12 +45,12 @@
 
 このプロジェクトでは、`GameObject`は次のような情報を持っている。
 
-* `name`: オブジェクトの名前
-* `active`: 動いているかどうか
-* `destroyed`: すでに消されたかどうか
-* `view`: 画面に表示されるもの
-* `components`: つけられているComponentの一覧
-* `transform`: 位置や回転などを扱うComponent
+- `name`: オブジェクトの名前
+- `active`: 動いているかどうか
+- `destroyed`: すでに消されたかどうか
+- `view`: 画面に表示されるもの
+- `components`: つけられているComponentの一覧
+- `transform`: 位置や回転などを扱うComponent
 
 `GameObject`を作ると、最初から`Transform`というComponentが追加される。
 
@@ -63,11 +63,11 @@
 
 このプロジェクトの`Component`には、次のような関数が用意されている。
 
-* `initialize()`: GameObjectに追加されたときに呼ばれる
-* `start()`: 最初の更新の直前に1回だけ呼ばれる
-* `tick(deltaTime)`: 毎フレーム呼ばれる
-* `lateTick(deltaTime)`: `tick`の後に毎フレーム呼ばれる
-* `onDestroy()`: 消されるときに呼ばれる
+- `initialize()`: GameObjectに追加されたときに呼ばれる
+- `start()`: 最初の更新の直前に1回だけ呼ばれる
+- `tick(deltaTime)`: 毎フレーム呼ばれる
+- `lateTick(deltaTime)`: `tick`の後に毎フレーム呼ばれる
+- `onDestroy()`: 消されるときに呼ばれる
 
 最初は全部を覚えなくていい。
 まずは、毎フレーム動かしたい処理を書く場所が`tick()`だと覚えるとよい。
@@ -100,22 +100,22 @@ tick(deltaTime) {
 import { Component } from "../engine/index.js";
 
 export class MoveRightComponent extends Component {
-    constructor() {
-        super();
-        this.speed = 200;
-    }
+  constructor() {
+    super();
+    this.speed = 200;
+  }
 
-    tick(deltaTime) {
-        this.transform.x += this.speed * deltaTime;
-    }
+  tick(deltaTime) {
+    this.transform.x += this.speed * deltaTime;
+  }
 }
 ```
 
 ポイントは3つ。
 
-* `Component`を`extends`して、自分用のComponentを作る
-* `constructor()`の中で`super()`を呼ぶ
-* 毎フレームしたいことを`tick()`に書く
+- `Component`を`extends`して、自分用のComponentを作る
+- `constructor()`の中で`super()`を呼ぶ
+- 毎フレームしたいことを`tick()`に書く
 
 ## GameObjectにComponentをつける
 
@@ -176,7 +176,7 @@ const move = gameObject.getComponent(MoveRightComponent);
 
 ```js
 if (gameObject.hasComponent(MoveRightComponent)) {
-    console.log("MoveRightComponentを持っています");
+  console.log("MoveRightComponentを持っています");
 }
 ```
 
@@ -227,17 +227,16 @@ GameObjectが動いている間、Componentの関数はだいたい次の順番�
 
 よく使うのは`start()`と`tick()`。
 
-* `start()`: 最初に1回だけ準備したいこと
-* `tick()`: 毎フレームくり返したいこと
+- `start()`: 最初に1回だけ準備したいこと
+- `tick()`: 毎フレームくり返したいこと
 
 ## まず覚えること
 
 最初は、次の3つだけ分かれば十分。
 
-* `GameObject`はゲーム内の「もの」
-* `Component`はGameObjectにつける「機能の部品」
-* 動き続ける処理は`tick(deltaTime)`に書く
+- `GameObject`はゲーム内の「もの」
+- `Component`はGameObjectにつける「機能の部品」
+- 動き続ける処理は`tick(deltaTime)`に書く
 
 慣れてきたら、`getComponent()`で他の部品を探したり、`setActive()`で一時停止したり、
 `destroy()`で消したりする使い方を覚えていくとよい。
-

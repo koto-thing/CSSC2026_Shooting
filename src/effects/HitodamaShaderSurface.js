@@ -11,7 +11,7 @@ const VERTEX_SHADER = `
 /**
  * 旧ひとだまver1
  */
-const FRAGMENT_SHADER = `
+const _FRAGMENT_SHADER = `
     precision mediump float;
 
     varying vec2 vUv;
@@ -533,7 +533,7 @@ const FRAGMENT_SHADER = `
  * 旧ひとだまver2
  * @type {string}
  */
-const REFERENCE_FRAGMENT_SHADER = `
+const _REFERENCE_FRAGMENT_SHADER = `
     precision mediump float;
 
     varying vec2 vUv;
@@ -904,139 +904,130 @@ const VIDEO_REFERENCE_FRAGMENT_SHADER = `
  * @returns {WebGLShader}
  */
 function compileShader(gl, type, source) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
 
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        const message = gl.getShaderInfoLog(shader);
-        gl.deleteShader(shader);
-        throw new Error(`Hitodama shader compile error: ${message}`);
-    }
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    const message = gl.getShaderInfoLog(shader);
+    gl.deleteShader(shader);
+    throw new Error(`Hitodama shader compile error: ${message}`);
+  }
 
-    return shader;
+  return shader;
 }
 
 /**
  * WebGLフラグメントシェーダーの出力をCreateJS用Canvasとして提供する
  */
 export class HitodamaShaderSurface {
-    /**
-     * コンストラクタ
-     * @param param0
-     * @param param0.width
-     * @param param0.height
-     * @param param0.phase
-     */
-    constructor({ width, height, phase = 0 } = {}) {
-        this.canvas = document.createElement("canvas");
-        this.canvas.width = Math.max(1, Math.ceil(width));
-        this.canvas.height = Math.max(1, Math.ceil(height));
-        this.canvas._isCanvas = true;
-        this.canvas._invalid = true;
+  /**
+   * コンストラクタ
+   * @param param0
+   * @param param0.width
+   * @param param0.height
+   * @param param0.phase
+   */
+  constructor({ width, height, phase = 0 } = {}) {
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = Math.max(1, Math.ceil(width));
+    this.canvas.height = Math.max(1, Math.ceil(height));
+    this.canvas._isCanvas = true;
+    this.canvas._invalid = true;
 
-        this.gl = this.canvas.getContext("webgl", {
-            alpha: true,
-            antialias: true,
-            premultipliedAlpha: true,
-            preserveDrawingBuffer: true,
-        });
+    this.gl = this.canvas.getContext("webgl", {
+      alpha: true,
+      antialias: true,
+      premultipliedAlpha: true,
+      preserveDrawingBuffer: true,
+    });
 
-        if (this.gl === null) {
-            throw new Error("WebGL is required to render the hitodama enemy.");
-        }
-
-        this.time = 0;
-        this.phase = phase;
-        this.program = this.#createProgram();
-        this.vertexBuffer = this.#createVertexBuffer();
-        this.positionLocation = this.gl.getAttribLocation(this.program, "aPosition");
-        this.timeLocation = this.gl.getUniformLocation(this.program, "uTime");
-        this.phaseLocation = this.gl.getUniformLocation(this.program, "uPhase");
-        this.render();
+    if (this.gl === null) {
+      throw new Error("WebGL is required to render the hitodama enemy.");
     }
 
-    /**
-     * シェーダーの更新
-     * @param deltaTime
-     */
-    tick(deltaTime) {
-        this.time += deltaTime;
-        this.render();
+    this.time = 0;
+    this.phase = phase;
+    this.program = this.#createProgram();
+    this.vertexBuffer = this.#createVertexBuffer();
+    this.positionLocation = this.gl.getAttribLocation(this.program, "aPosition");
+    this.timeLocation = this.gl.getUniformLocation(this.program, "uTime");
+    this.phaseLocation = this.gl.getUniformLocation(this.program, "uPhase");
+    this.render();
+  }
+
+  /**
+   * シェーダーの更新
+   * @param deltaTime
+   */
+  tick(deltaTime) {
+    this.time += deltaTime;
+    this.render();
+  }
+
+  /**
+   * レンダリングする
+   */
+  render() {
+    const gl = this.gl;
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(this.program);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+    gl.enableVertexAttribArray(this.positionLocation);
+    gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform1f(this.timeLocation, this.time);
+    gl.uniform1f(this.phaseLocation, this.phase);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.flush();
+    this.canvas._invalid = true;
+  }
+
+  /**
+   * バッファ削除など
+   */
+  destroy() {
+    const gl = this.gl;
+    gl.deleteBuffer(this.vertexBuffer);
+    gl.deleteProgram(this.program);
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    this.gl = null;
+  }
+
+  /**
+   * シェーダーコンパイルとアタッチ
+   * @returns {WebGLProgram}
+   */
+  #createProgram() {
+    const gl = this.gl;
+    const vertexShader = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
+    const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, VIDEO_REFERENCE_FRAGMENT_SHADER);
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      const message = gl.getProgramInfoLog(program);
+      gl.deleteProgram(program);
+      throw new Error(`Hitodama shader link error: ${message}`);
     }
 
-    /**
-     * レンダリングする
-     */
-    render() {
-        const gl = this.gl;
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.useProgram(this.program);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-        gl.enableVertexAttribArray(this.positionLocation);
-        gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
-        gl.uniform1f(this.timeLocation, this.time);
-        gl.uniform1f(this.phaseLocation, this.phase);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        gl.flush();
-        this.canvas._invalid = true;
-    }
+    return program;
+  }
 
-    /**
-     * バッファ削除など
-     */
-    destroy() {
-        const gl = this.gl;
-        gl.deleteBuffer(this.vertexBuffer);
-        gl.deleteProgram(this.program);
-        gl.getExtension("WEBGL_lose_context")?.loseContext();
-        this.gl = null;
-    }
-
-    /**
-     * シェーダーコンパイルとアタッチ
-     * @returns {WebGLProgram}
-     */
-    #createProgram() {
-        const gl = this.gl;
-        const vertexShader = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
-        const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, VIDEO_REFERENCE_FRAGMENT_SHADER);
-        const program = gl.createProgram();
-        gl.attachShader(program, vertexShader);
-        gl.attachShader(program, fragmentShader);
-        gl.linkProgram(program);
-        gl.deleteShader(vertexShader);
-        gl.deleteShader(fragmentShader);
-
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            const message = gl.getProgramInfoLog(program);
-            gl.deleteProgram(program);
-            throw new Error(`Hitodama shader link error: ${message}`);
-        }
-
-        return program;
-    }
-
-    /**
-     * 頂点バッファを作成する
-     * @returns {AudioBuffer | GPUBuffer | WebGLBuffer}
-     */
-    #createVertexBuffer() {
-        const gl = this.gl;
-        const buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(
-            gl.ARRAY_BUFFER,
-            new Float32Array([
-                -1, -1,
-                 1, -1,
-                -1,  1,
-                 1,  1,
-            ]),
-            gl.STATIC_DRAW,
-        );
-        return buffer;
-    }
+  /**
+   * 頂点バッファを作成する
+   * @returns {AudioBuffer | GPUBuffer | WebGLBuffer}
+   */
+  #createVertexBuffer() {
+    const gl = this.gl;
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    return buffer;
+  }
 }

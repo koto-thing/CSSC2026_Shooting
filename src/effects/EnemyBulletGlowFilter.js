@@ -1,8 +1,8 @@
 export class EnemyBulletGlowFilter extends createjs.Filter {
-    constructor() {
-        super();
-        
-        this.FRAG_SHADER_BODY = `
+  constructor() {
+    super();
+
+    this.FRAG_SHADER_BODY = `
             void main() {
                 vec2 uv = vRenderCoord;
                 vec4 source = texture2D(uSampler, uv);
@@ -30,5 +30,5 @@ export class EnemyBulletGlowFilter extends createjs.Filter {
                 gl_FragColor = vec4(color, alpha);
             }
         `;
-    }    
+  }
 }

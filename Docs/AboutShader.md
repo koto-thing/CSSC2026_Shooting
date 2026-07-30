@@ -7,9 +7,7 @@ Shaderは、画面に出す絵の色を決めるための小さなプログラ�
 普通のJavaScriptでは、次のように「円を描く」「四角を描く」と命令する。
 
 ```js
-view.graphics
-    .beginFill("#44aaff")
-    .drawCircle(0, 0, 12);
+view.graphics.beginFill("#44aaff").drawCircle(0, 0, 12);
 ```
 
 Shaderでは、少し考え方が変わる。
@@ -23,12 +21,12 @@ Shaderは、その1つ1つに対して色を決める。
 
 Shaderは、画像編集アプリのフィルターに近い。
 
-* 明るくする
-* 暗くする
-* 赤っぽくする
-* ぼかす
-* 光っているように見せる
-* 2Dの円を球のように見せる
+- 明るくする
+- 暗くする
+- 赤っぽくする
+- ぼかす
+- 光っているように見せる
+- 2Dの円を球のように見せる
 
 これらをプログラムで書くのがShader。
 
@@ -38,8 +36,8 @@ Shaderは、画像編集アプリのフィルターに近い。
 
 CreateJSには大きく分けて2種類のStageがある。
 
-* `createjs.Stage`: 普通のCanvas2D描画
-* `createjs.StageGL`: WebGLを使った描画
+- `createjs.Stage`: 普通のCanvas2D描画
+- `createjs.StageGL`: WebGLを使った描画
 
 Shaderを使いたい場合は`StageGL`を使う。
 
@@ -66,10 +64,10 @@ src/effects/SphereShaderFilter.js
 
 ```js
 export class SphereShaderFilter extends createjs.Filter {
-    constructor() {
-        super();
+  constructor() {
+    super();
 
-        this.FRAG_SHADER_BODY = `
+    this.FRAG_SHADER_BODY = `
             void main() {
                 vec2 uv = vRenderCoord;
                 vec4 color = texture2D(uSampler, vRenderCoord);
@@ -77,7 +75,7 @@ export class SphereShaderFilter extends createjs.Filter {
                 gl_FragColor = color;
             }
         `;
-    }
+  }
 }
 ```
 
@@ -100,10 +98,10 @@ vec4 pixel = vec4(1.0, 0.0, 0.0, 1.0);
 
 よく使う型は次の通り。
 
-* `float`: 小数。例: `0.5`
-* `vec2`: 数字2つのセット。例: `x, y`
-* `vec3`: 数字3つのセット。例: `r, g, b`
-* `vec4`: 数字4つのセット。例: `r, g, b, a`
+- `float`: 小数。例: `0.5`
+- `vec2`: 数字2つのセット。例: `x, y`
+- `vec3`: 数字3つのセット。例: `r, g, b`
+- `vec4`: 数字4つのセット。例: `r, g, b, a`
 
 色はだいたい`vec4`で扱う。
 
@@ -113,10 +111,10 @@ vec4 color = vec4(1.0, 0.0, 0.0, 1.0);
 
 これは赤色。
 
-* 1つ目: 赤
-* 2つ目: 緑
-* 3つ目: 青
-* 4つ目: 透明度
+- 1つ目: 赤
+- 2つ目: 緑
+- 3つ目: 青
+- 4つ目: 透明度
 
 色の値は`0.0`から`1.0`で表す。
 
@@ -229,9 +227,9 @@ vec2 p = uv * 2.0 - 1.0;
 
 すると、だいたい次のようになる。
 
-* 左上: `(-1.0, -1.0)`
-* 中心: `(0.0, 0.0)`
-* 右下: `(1.0, 1.0)`
+- 左上: `(-1.0, -1.0)`
+- 中心: `(0.0, 0.0)`
+- 右下: `(1.0, 1.0)`
 
 中心からの距離は`length()`で計算できる。
 
@@ -282,10 +280,10 @@ float diffuse = max(dot(normal, lightDir), 0.0);
 
 ざっくり言うと、次のことをしている。
 
-* `normal`: 球の表面がどちらを向いているか
-* `lightDir`: 光がどちらから来ているか
-* `dot()`: 向きがどれくらい近いか
-* `diffuse`: 光の当たり具合
+- `normal`: 球の表面がどちらを向いているか
+- `lightDir`: 光がどちらから来ているか
+- `dot()`: 向きがどれくらい近いか
+- `diffuse`: 光の当たり具合
 
 完成形は次のようになる。
 
@@ -321,9 +319,7 @@ import { SphereShaderFilter } from "../effects/SphereShaderFilter.js";
 
 const view = new createjs.Shape();
 
-view.graphics
-    .beginFill("#44aaff")
-    .drawCircle(0, 0, 12);
+view.graphics.beginFill("#44aaff").drawCircle(0, 0, 12);
 
 view.filters = [new SphereShaderFilter()];
 view.cache(-12, -12, 24, 24);
@@ -405,11 +401,11 @@ void main() {
 
 最初は、次の5つだけ分かれば十分。
 
-* Shaderは「ピクセルごとの色を決めるプログラム」
-* `texture2D(uSampler, vRenderCoord)`で元の色を取る
-* `gl_FragColor`に入れた色が画面に出る
-* `vRenderCoord`で今の場所が分かる
-* CreateJSでは`filters`に入れて、`cache()`して使う
+- Shaderは「ピクセルごとの色を決めるプログラム」
+- `texture2D(uSampler, vRenderCoord)`で元の色を取る
+- `gl_FragColor`に入れた色が画面に出る
+- `vRenderCoord`で今の場所が分かる
+- CreateJSでは`filters`に入れて、`cache()`して使う
 
 慣れてきたら、`sin()`、`cos()`、`length()`、`dot()`、`normalize()`などの関数を使って、
 光、波、ゆがみ、発光などを作っていくとよい。

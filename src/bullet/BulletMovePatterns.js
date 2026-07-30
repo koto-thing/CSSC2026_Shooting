@@ -8,8 +8,8 @@
  * @param deltaTime 前回のフレームからの経過時間（秒）
  */
 function moveStraight(bullet, direction, moveSpeed, deltaTime) {
-    bullet.transform.x += direction.x * moveSpeed * deltaTime;
-    bullet.transform.y += direction.y * moveSpeed * deltaTime;
+  bullet.transform.x += direction.x * moveSpeed * deltaTime;
+  bullet.transform.y += direction.y * moveSpeed * deltaTime;
 }
 
 /**
@@ -19,22 +19,22 @@ function moveStraight(bullet, direction, moveSpeed, deltaTime) {
  * @returns {null|any} 最も近い敵のゲームオブジェクト、存在しない場合はnull
  */
 function nearestEnemy(bullet, enemies) {
-    let nearest = null;
-    let nearestDistance = Infinity;
-    
-    for (const enemy of enemies) {
-        if (!enemy.active) {
-            continue;
-        }
-        
-        const distance = Vector2.distance(bullet.transform, enemy.transform);
-        if (distance < nearestDistance) {
-            nearest = enemy;
-            nearestDistance = distance;
-        }
+  let nearest = null;
+  let nearestDistance = Infinity;
+
+  for (const enemy of enemies) {
+    if (!enemy.active) {
+      continue;
     }
-    
-    return nearest;
+
+    const distance = Vector2.distance(bullet.transform, enemy.transform);
+    if (distance < nearestDistance) {
+      nearest = enemy;
+      nearestDistance = distance;
+    }
+  }
+
+  return nearest;
 }
 
 /**
@@ -42,52 +42,50 @@ function nearestEnemy(bullet, enemies) {
  * @type {{straight(*, *, *, *): void, homing(*, *, *, *): void}}
  */
 export const BulletMovePatterns = {
-    /**
-     * 弾を直線的に移動させるパターン
-     * @param bullet 弾のゲームオブジェクト
-     * @param deltaTime 前回のフレームからの経過時間（秒）
-     * @param state 弾の状態を保持するオブジェクト
-     * @param context 弾の移動に関するコンテキスト情報を保持するオブジェクト
-     */
-    straight(bullet, deltaTime, state, context) {
-        moveStraight(bullet, context.direction, context.moveSpeed, deltaTime);
-    },
+  /**
+   * 弾を直線的に移動させるパターン
+   * @param bullet 弾のゲームオブジェクト
+   * @param deltaTime 前回のフレームからの経過時間（秒）
+   * @param state 弾の状態を保持するオブジェクト
+   * @param context 弾の移動に関するコンテキスト情報を保持するオブジェクト
+   */
+  straight(bullet, deltaTime, state, context) {
+    moveStraight(bullet, context.direction, context.moveSpeed, deltaTime);
+  },
 
-    /**
-     * 弾をホーミングさせるパターン
-     * @param bullet 弾のゲームオブジェクト
-     * @param deltaTime 前回のフレームからの経過時間（秒）
-     * @param state 弾の状態を保持するオブジェクト
-     * @param context 弾の移動に関するコンテキスト情報を保持するオブジェクト
-     */
-    homing(bullet, deltaTime, state, context) {
-        if (state.direction === undefined) {
-            state.direction = context.direction.normalized;
-        } 
-        
-        // 敵のリストを取得し、最も近い敵をターゲットとして取得する
-        const enemies = context.config.enemyProvider?.() ?? [];
-        const target = nearestEnemy(bullet, enemies);
-        
-        // ターゲットが存在する場合は、ターゲットの方向に向かって弾を回転させる
-        if (target !== null) {
-            // ターゲットの方向を計算する
-            const desired = Vector2
-                .subtract(target.transform, bullet.transform)
-                .normalized;
-            
-            // 弾の現在の方向とターゲットの方向の間を補間する
-            const turnRate = context.config.turnRate ?? 8;
-            const t = Math.min(1, turnRate * deltaTime);
-            
-            // 弾の方向を更新する
-            state.direction = new Vector2(
-                state.direction.x + (desired.x - state.direction.x) * t, 
-                state.direction.y + (desired.y - state.direction.y) * t, 
-            ).normalized;
-        }
-        
-        // 弾を現在の方向に沿って移動させる
-        moveStraight(bullet, state.direction, context.moveSpeed, deltaTime);
-    },
+  /**
+   * 弾をホーミングさせるパターン
+   * @param bullet 弾のゲームオブジェクト
+   * @param deltaTime 前回のフレームからの経過時間（秒）
+   * @param state 弾の状態を保持するオブジェクト
+   * @param context 弾の移動に関するコンテキスト情報を保持するオブジェクト
+   */
+  homing(bullet, deltaTime, state, context) {
+    if (state.direction === undefined) {
+      state.direction = context.direction.normalized;
+    }
+
+    // 敵のリストを取得し、最も近い敵をターゲットとして取得する
+    const enemies = context.config.enemyProvider?.() ?? [];
+    const target = nearestEnemy(bullet, enemies);
+
+    // ターゲットが存在する場合は、ターゲットの方向に向かって弾を回転させる
+    if (target !== null) {
+      // ターゲットの方向を計算する
+      const desired = Vector2.subtract(target.transform, bullet.transform).normalized;
+
+      // 弾の現在の方向とターゲットの方向の間を補間する
+      const turnRate = context.config.turnRate ?? 8;
+      const t = Math.min(1, turnRate * deltaTime);
+
+      // 弾の方向を更新する
+      state.direction = new Vector2(
+        state.direction.x + (desired.x - state.direction.x) * t,
+        state.direction.y + (desired.y - state.direction.y) * t,
+      ).normalized;
+    }
+
+    // 弾を現在の方向に沿って移動させる
+    moveStraight(bullet, state.direction, context.moveSpeed, deltaTime);
+  },
 };

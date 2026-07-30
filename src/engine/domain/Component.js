@@ -1,61 +1,53 @@
-﻿/** GameObjectへ追加できる振る舞いの基底クラス */
+﻿/**
+ * GameObject へ追加できるふるまいの基底クラス
+ */
 export class Component {
-    /**
-     * コンストラクタ
-     */
-    constructor() {
-        this.gameObject = null;
-        this.enabled = true;
-        this._started = false;
-    }
+  /**
+   * コンストラクタ
+   */
+  constructor() {
+    this.gameObject = null;
+    this.enabled = true;
+    this._initialized = false;
+  }
 
-    /**
-     * ゲームオブジェクトのトランスフォームを取得する
-     * @returns {*|null}
-     */
-    get transform() {
-        return this.gameObject?.transform ?? null;
-    }
+  /**
+   * ゲームオブジェクトのトランスフォームを取得する
+   * @returns {import("./Transform.js").Transform|null}
+   */
+  get transform() {
+    return this.gameObject?.transform ?? null;
+  }
 
-    /**
-     * コンポーネントが初期化されたときに呼び出される
-     */
-    initialize() {
-        
-    }
+  /**
+   * コンポーネントが初期化された時に呼び出される
+   */
+  initialize() {}
 
-    /**
-     * コンポーネントが開始されたときに呼び出される
-     */
-    start() {
-        
-    }
+  /**
+   * initialize() 後に呼び出される
+   */
+  lateInitialize() {}
 
-    /**
-     * コンポーネントが更新されるたびに呼び出される
-     */
-    tick() {
-        
-    }
+  /**
+   * コンポーネントが更新されるたびに呼び出される
+   */
+  tick() {}
 
-    /**
-     * コンポーネントが更新された後に呼び出される
-     */
-    lateTick() {
-        
-    }
+  /**
+   * tick() が呼ばれた後に呼び出される
+   */
+  lateTick() {}
 
-    /**
-     * コンポーネントが破棄されるときに呼び出される
-     */
-    onDestroy() {
-        
-    }
+  /**
+   * コンポーネントが破棄されるときに呼び出される
+   */
+  onDestroy() {}
 
-    /**
-     * コンポーネントを破棄する
-     */
-    destroy() {
-        this.gameObject?.destroy();
-    }
+  /**
+   * コンポーネントを破棄する
+   */
+  destroy() {
+    this.gameObject?.destroy();
+  }
 }

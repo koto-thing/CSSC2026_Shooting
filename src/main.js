@@ -1,41 +1,38 @@
-import "./style.css"
+import "./style.css";
 
 import { AssetManager, Game, SceneManager } from "./engine/index.js";
-import { TitleScene } from "./scenes/TitleScene.js";
-import { GameScene } from "./scenes/GameScene.js";
+import { GameSession } from "./config/GameSession.js";
 import { assetList } from "./assets/AssetsList.js";
+import { CreditsScene } from "./scenes/CreditsScene.js";
+import { GameScene } from "./scenes/GameScene.js";
+import { MainMenuScene } from "./scenes/MainMenuScene.js";
+import { TitleScene } from "./scenes/TitleScene.js";
 
-/**
- * ゲームを初期化してメインループを開始する
- * @returns {Promise<void>}
- */
 async function main() {
-    // ゲーム本体を作成
-    const game = new Game("gameCanvas");
-    
-    // アセット登録
-    const assetManager = new AssetManager();
-    assetManager.register(assetList);
-    
-    await assetManager.load();
-    
-    // シーンマネージャーを作成
-    const sceneManager = new SceneManager(game.stage);
-    game.onResize(({ width, height }) => {
-        sceneManager.resize(width, height);
-    });
+  const game = new Game("gameCanvas");
 
-    sceneManager.register("title", () => new TitleScene({ sceneManager, assetManager }));
-    sceneManager.register("game", () => new GameScene({ sceneManager, assetManager }));
-    
-    sceneManager.changeScene("title");
-    
-    // ゲームループ
-    game.start((deltaTime) => {
-        sceneManager.tick(deltaTime);
-    });
+  const assetManager = new AssetManager();
+  assetManager.register(assetList);
+  await assetManager.load();
+
+  const session = new GameSession();
+  const sceneManager = new SceneManager(game.stage);
+  game.onResize(({ width, height }) => {
+    sceneManager.resize(width, height);
+  });
+
+  sceneManager.register("title", () => new TitleScene({ sceneManager, assetManager }));
+  sceneManager.register("credits", () => new CreditsScene({ sceneManager }));
+  sceneManager.register("menu", () => new MainMenuScene({ sceneManager, session }));
+  sceneManager.register("game", () => new GameScene({ sceneManager, assetManager, session }));
+
+  sceneManager.changeScene("title");
+
+  game.start((deltaTime) => {
+    sceneManager.tick(deltaTime);
+  });
 }
 
 main().catch((error) => {
-    console.error("Error while initializing game", error);
+  console.error("Error while initializing game", error);
 });

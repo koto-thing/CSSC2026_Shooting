@@ -1,132 +1,73 @@
-import { Component, Input, KeyCode, Vector2, clamp } from "../engine/index.js";
+import { Component, InputSystem, KeyCode, Vector2, clamp } from "../engine/index.js";
 
-/** 
- * プレイヤーの移動、ショット、ボム入力を制御するコンポーネント
- */
 export class PlayerControllerComponent extends Component {
-    /** プレイヤー操作コンポーネントを初期化する */
-    constructor({ boundsProvider, onShot } = {}) {
-        super();
-        
-        this.boundsProvider = boundsProvider;
-        this.onShot = onShot;
-        this.moveSpeed = 300;     // プレイヤーの基本移動速度
-        this.slowMoveSpeed = 120; // 低速時のプレイヤーの移動速度
-        this.shotCooldown = 0.1;  // ショットのクールダウン
-        this.bombCooldown = 1.0;  // ボムのクールダウン
-        
-        this.shotTimer = 0;       // ショットのタイマー
-        this.bombTimer = 0;       // ボムのタイマー
+  constructor({ boundsProvider, onShot } = {}) {
+    super();
+
+    this.boundsProvider = boundsProvider;
+    this.onShot = onShot;
+    this.moveSpeed = 300;
+    this.slowMoveSpeed = 120;
+    this.isSlowMoving = false;
+  }
+
+  tick(deltaTime) {
+    this.#move(deltaTime);
+    this.#shot(deltaTime);
+  }
+
+  #move(deltaTime) {
+    const direction = Vector2.zero();
+
+    if (InputSystem.getKey(KeyCode.ArrowLeft) || InputSystem.getKey(KeyCode.A)) {
+      direction.x -= 1;
+    }
+    if (InputSystem.getKey(KeyCode.ArrowRight) || InputSystem.getKey(KeyCode.D)) {
+      direction.x += 1;
+    }
+    if (InputSystem.getKey(KeyCode.ArrowUp) || InputSystem.getKey(KeyCode.W)) {
+      direction.y -= 1;
+    }
+    if (InputSystem.getKey(KeyCode.ArrowDown) || InputSystem.getKey(KeyCode.S)) {
+      direction.y += 1;
     }
 
-    /**
-     * ゲームオブジェクトの状態を更新する
-     * @param deltaTime {number} 前回のフレームからの経過時間（秒）
-     */
-    tick(deltaTime) {
-        this.shotTimer -= deltaTime;
-        this.bombTimer -= deltaTime;
-        
-        this.#move(deltaTime);
-        this.#shot(deltaTime);
-        this.#bomb(deltaTime);
+    this.isSlowMoving =
+      InputSystem.getKey(KeyCode.ShiftLeft) || InputSystem.getKey(KeyCode.ShiftRight);
+
+    if (direction.sqrMagnitude === 0) {
+      return;
     }
 
-    /**
-     * プレイヤーの移動処理
-     * @param deltaTime {number} 前回のフレームからの経過時間（秒）
-     */
-    #move(deltaTime) {
-        const direction = Vector2.zero();
-        
-        // 左
-        if (Input.getKey(KeyCode.ArrowLeft)) {
-            direction.x -= 1;
-        }
-        
-        // 右
-        if (Input.getKey(KeyCode.ArrowRight)) {
-            direction.x += 1;
-        } 
-        
-        // 上
-        if (Input.getKey(KeyCode.ArrowUp)) {
-            direction.y -= 1;
-        }
-        
-        // 下
-        if (Input.getKey(KeyCode.ArrowDown)) {
-            direction.y += 1;
-        }
-        
-        // 負荷軽減のため、移動しないなら以降の処理は行わない
-        if (direction.sqrMagnitude === 0) {
-            return;
-        }
-        
-        // 斜め移動のためにベクトル正規化
-        direction.normalize();
-        
-        // 低速キーが押されているかどうか判定
-        const isSlow = 
-            Input.getKey(KeyCode.ShiftLeft) ||
-            Input.getKey(KeyCode.ShiftRight);
-        
-        // 最終的なスピードを決定
-        const speed = isSlow ? this.slowMoveSpeed : this.moveSpeed;
-        
-        // 最終的なスピードをもとに座標を移動
-        this.transform.x += direction.x * speed * deltaTime;
-        this.transform.y += direction.y * speed * deltaTime;
-        
-        // プレイ領域の範囲内にクランプ
-        if (this.boundsProvider !== undefined) {
-            const bounds = this.boundsProvider.playArea ?? {
-                x: 0,
-                y: 0,
-                width: this.boundsProvider.width,
-                height: this.boundsProvider.height,
-            };
+    direction.normalize();
+    const speed = this.isSlowMoving ? this.slowMoveSpeed : this.moveSpeed;
+    this.transform.x += direction.x * speed * deltaTime;
+    this.transform.y += direction.y * speed * deltaTime;
 
-            this.transform.x = clamp(this.transform.x, bounds.x, bounds.x + bounds.width);
-            this.transform.y = clamp(this.transform.y, bounds.y, bounds.y + bounds.height);
-        }
+    const bounds = this.boundsProvider?.playArea ?? {
+      x: 0,
+      y: 0,
+      width: this.boundsProvider?.width ?? 1,
+      height: this.boundsProvider?.height ?? 1,
+    };
+
+    this.transform.x = clamp(this.transform.x, bounds.x, bounds.x + bounds.width);
+    this.transform.y = clamp(this.transform.y, bounds.y, bounds.y + bounds.height);
+  }
+
+  #shot(deltaTime) {
+    if (!InputSystem.getKey(KeyCode.Z)) {
+      return;
     }
 
-    /**
-     * プレイヤーのショット処理
-     * @param deltaTime {number} 前回のフレームからの経過時間（秒）
-     */
-    #shot(deltaTime) {
-        if (!Input.getKey(KeyCode.Z)) {
-            return;
-        }
-        
-        for (const shotSlot of this.gameObject.shotSlots) {
-            shotSlot.timer -= deltaTime;
-            
-            if (shotSlot.timer > 0) {
-                continue;
-            }
-            
-            shotSlot.timer = shotSlot.cooldown;
-            this.onShot?.(this.gameObject, shotSlot);
-        }
-    }
+    for (const shotSlot of this.gameObject.shotSlots) {
+      shotSlot.timer -= deltaTime;
+      if (shotSlot.timer > 0) {
+        continue;
+      }
 
-    /**
-     * プレイヤーのボム処理
-     * @param deltaTime {number} 前回のフレームからの経過時間（秒）
-     */
-    #bomb(deltaTime) {
-        if (!Input.getKeyDown(KeyCode.X)) {
-            return;
-        }
-        
-        if (this.bombTimer > 0) {
-            return;
-        }
-        
-        this.bombTimer = this.bombCooldown;
+      shotSlot.timer = shotSlot.cooldown;
+      this.onShot?.(this.gameObject, shotSlot);
     }
+  }
 }
