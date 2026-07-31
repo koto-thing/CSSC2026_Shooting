@@ -3,13 +3,15 @@ import { BulletManager } from "../bullet/BulletManager.js";
 import { EnemyManager } from "../enemy/EnemyManager.js";
 import { EnemySpawner } from "../enemy/EnemySpawner.js";
 import { InputSystem, KeyCode, Scene, clamp } from "../engine/index.js";
-import { GameplaySpaceBackground } from "../effects/GameplaySpaceBackground.js";
+import { ThemedGameplayBackground } from "../effects/ThemedGameplayBackground.js";
 import { EnemyDefeatEffectManager } from "../effects/EnemyDefeatEffectManager.js";
+import { GameplayTransitionEffects } from "../effects/GameplayTransitionEffects.js";
 import { Player } from "../player/Player.js";
 import { PlayerShotPatterns } from "../player/PlayerShotPatterns.js";
 import { ChapterController } from "../stage/ChapterController.js";
 import { StageDefinitions } from "../stage/StageDefinitions.js";
 import { ChapterBanner } from "../ui/ChapterBanner.js";
+import { BossStatusOverlay } from "../ui/BossStatusOverlay.js";
 import { Hud } from "../ui/Hud.js";
 import { PauseOverlay } from "../ui/PauseOverlay.js";
 import { ResultOverlay } from "../ui/ResultOverlay.js";
@@ -31,10 +33,12 @@ export class GameScene extends Scene {
     this.enemyManager = null;
     this.enemySpawner = null;
     this.enemyDefeatEffectManager = null;
+    this.transitionEffects = null;
     this.player = null;
     this.chapterController = null;
     this.hud = null;
     this.chapterBanner = null;
+    this.bossStatusOverlay = null;
     this.pauseOverlay = null;
     this.resultOverlay = null;
     this.playArea = { x: 0, y: 0, width: 0, height: 0 };
@@ -45,7 +49,7 @@ export class GameScene extends Scene {
 
   initialize() {
     this.background = new createjs.Shape();
-    this.gameplayBackground = new GameplaySpaceBackground();
+    this.gameplayBackground = new ThemedGameplayBackground();
     this.gameplayLayer = new createjs.Container();
     this.gameplayMask = new createjs.Shape();
     this.gameplayBackground.view.mask = this.gameplayMask;
@@ -69,6 +73,7 @@ export class GameScene extends Scene {
     });
 
     this.enemyDefeatEffectManager = new EnemyDefeatEffectManager({ root: this.gameplayLayer });
+    this.transitionEffects = new GameplayTransitionEffects({ root: this.gameplayLayer });
     this.enemyManager = new EnemyManager({
       root: this.gameplayLayer,
       boundsProvider: this,
@@ -84,6 +89,7 @@ export class GameScene extends Scene {
 
     this.hud = new Hud({ root: this.root });
     this.chapterBanner = new ChapterBanner({ root: this.root });
+    this.bossStatusOverlay = new BossStatusOverlay({ root: this.root });
     this.pauseOverlay = new PauseOverlay({ root: this.root });
     this.resultOverlay = new ResultOverlay({
       root: this.root,
@@ -97,11 +103,19 @@ export class GameScene extends Scene {
       bulletManager: this.bulletManager,
       snapshotProvider: () => this.#createSnapshot(),
       snapshotRestorer: (snapshot) => this.#restoreSnapshot(snapshot),
-      onChapterStart: ({ stage, chapter }) => {
+      onChapterStart: ({ stage, chapter, isRetry }) => {
+        if (isRetry) {
+          this.session.retryChapter();
+        } else {
+          this.session.startChapter();
+        }
+        this.gameplayBackground.setTheme(stage.theme);
         this.#resetPlayerPosition();
+        this.transitionEffects.playClear(this.player.transform.x, this.player.transform.y);
         this.chapterBanner.show(stage.name, chapter.name);
       },
       onChapterClear: () => {
+        this.session.clearChapter();
         this.session.score += 5000;
       },
       onStageClear: () => {
@@ -128,6 +142,14 @@ export class GameScene extends Scene {
       stage: this.chapterController?.currentStage,
       chapter: this.chapterController?.currentChapter,
       chapterElapsed: this.chapterController?.chapterElapsed ?? 0,
+      stageIndex: this.chapterController?.stageIndex ?? 0,
+      stageCount: StageDefinitions.length,
+      chapterIndex: this.chapterController?.chapterIndex ?? 0,
+    });
+    this.bossStatusOverlay?.update({
+      boss: this.enemyManager?.getActiveEnemies().find((enemy) => enemy.isBoss),
+      chapter: this.chapterController?.currentChapter,
+      chapterElapsed: this.chapterController?.chapterElapsed ?? 0,
     });
 
     if (this.paused || this.chapterController?.isComplete) {
@@ -136,6 +158,7 @@ export class GameScene extends Scene {
 
     this.session.elapsedSeconds += deltaTime;
     this.gameplayBackground?.tick(deltaTime);
+    this.transitionEffects?.tick(deltaTime);
 
     if (this.deathTimer > 0) {
       this.deathTimer -= deltaTime;
@@ -159,8 +182,10 @@ export class GameScene extends Scene {
     this.bulletManager?.clearAll();
     this.hud?.destroy();
     this.chapterBanner?.destroy();
+    this.bossStatusOverlay?.destroy();
     this.pauseOverlay?.destroy();
     this.resultOverlay?.destroy();
+    this.transitionEffects?.destroy();
   }
 
   resize(width, height) {
@@ -213,6 +238,8 @@ export class GameScene extends Scene {
 
     this.hud?.layout(this.uiArea.width > 0 ? this.uiArea : this.playArea);
     this.chapterBanner?.layout(this.playArea);
+    this.bossStatusOverlay?.layout(this.playArea);
+    this.transitionEffects?.layout(this.playArea);
     this.pauseOverlay?.layout(this.width, this.height);
     this.resultOverlay?.layout(this.width, this.height);
     this.background.cache(0, 0, this.width, this.height);
@@ -289,6 +316,7 @@ export class GameScene extends Scene {
     }
 
     this.player.setActive(false);
+    this.transitionEffects?.playHit(this.player.transform.x, this.player.transform.y);
     this.deathTimer = 0.75;
   }
 

@@ -63,6 +63,51 @@ const visualDefinitions = {
         .endStroke();
     },
   },
+
+  enemyRedOrb: {
+    radius: 9,
+    cachePadding: 4,
+    filters: [() => new EnemyBulletGlowFilter()],
+    draw(graphics, { radius }) {
+      graphics
+        .beginRadialGradientFill(
+          ["#ffffff", "#ffccd7", "#ff315f", "#710018"],
+          [0, 0.25, 0.68, 1],
+          -2,
+          -2,
+          0,
+          0,
+          0,
+          radius,
+        )
+        .drawCircle(0, 0, radius)
+        .endFill()
+        .setStrokeStyle(1.4)
+        .beginStroke("#50000f")
+        .drawCircle(0, 0, radius - 0.6)
+        .endStroke();
+    },
+  },
+
+  enemyWhiteOrb: {
+    radius: 8,
+    cachePadding: 4,
+    draw(graphics, { radius }) {
+      graphics
+        .beginRadialGradientFill(
+          ["#ffffff", "#fffbd1", "#f7baff", "rgba(129,40,180,0)"],
+          [0, 0.34, 0.7, 1],
+          0,
+          0,
+          0,
+          0,
+          0,
+          radius + 3,
+        )
+        .drawCircle(0, 0, radius + 3)
+        .endFill();
+    },
+  },
 };
 
 /**

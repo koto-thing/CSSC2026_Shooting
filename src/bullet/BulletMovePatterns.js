@@ -88,4 +88,45 @@ export const BulletMovePatterns = {
     // 弾を現在の方向に沿って移動させる
     moveStraight(bullet, state.direction, context.moveSpeed, deltaTime);
   },
+
+  accelerated(bullet, deltaTime, state, context) {
+    state.age = (state.age ?? 0) + deltaTime;
+    const acceleration = context.config.acceleration ?? 90;
+    const maximum = context.config.maxSpeed ?? context.moveSpeed * 2.2;
+    state.speed = Math.min(maximum, (state.speed ?? context.moveSpeed) + acceleration * deltaTime);
+    moveStraight(bullet, context.direction, state.speed, deltaTime);
+  },
+
+  decelerateThenGo(bullet, deltaTime, state, context) {
+    state.age = (state.age ?? 0) + deltaTime;
+    const holdTime = context.config.holdTime ?? 0.75;
+    if (state.age < holdTime) {
+      const ratio = Math.max(0.08, 1 - state.age / holdTime);
+      moveStraight(bullet, context.direction, context.moveSpeed * ratio, deltaTime);
+      return;
+    }
+    const acceleration = context.config.acceleration ?? 240;
+    state.speed = Math.min(
+      context.config.maxSpeed ?? context.moveSpeed * 2.5,
+      (state.speed ?? context.moveSpeed * 0.08) + acceleration * deltaTime,
+    );
+    moveStraight(bullet, context.direction, state.speed, deltaTime);
+  },
+
+  wave(bullet, deltaTime, state, context) {
+    state.age = (state.age ?? 0) + deltaTime;
+    const direction = context.direction;
+    const perpendicular = new Vector2(-direction.y, direction.x);
+    const frequency = context.config.frequency ?? 5;
+    const amplitude = context.config.amplitude ?? 70;
+    const sideways = Math.cos(state.age * frequency) * amplitude;
+    bullet.transform.x +=
+      (direction.x * context.moveSpeed + perpendicular.x * sideways) * deltaTime;
+    bullet.transform.y +=
+      (direction.y * context.moveSpeed + perpendicular.y * sideways) * deltaTime;
+    state.direction = new Vector2(
+      direction.x * context.moveSpeed + perpendicular.x * sideways,
+      direction.y * context.moveSpeed + perpendicular.y * sideways,
+    ).normalized;
+  },
 };

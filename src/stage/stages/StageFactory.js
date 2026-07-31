@@ -36,6 +36,11 @@ function bossChapter(id, name, bossOverrides = {}) {
 export function createStage({ id, name, estimatedSeconds, theme, difficulty = 1 }) {
   const speed = 1 + difficulty * 0.08;
   const hp = 1 + difficulty * 0.18;
+  const midPatterns = ["aimedFan", "circle15WithOffset", "doubleSpiral", "lunarWave"];
+  const finalPatterns = ["circle15WithOffset", "doubleSpiral", "lunarWave", "pureRing"];
+  const midPattern =
+    midPatterns[Math.min(midPatterns.length - 1, Math.floor((difficulty - 1) / 2))];
+  const finalPattern = finalPatterns[Math.min(finalPatterns.length - 1, difficulty - 1)];
 
   return {
     id,
@@ -80,6 +85,9 @@ export function createStage({ id, name, estimatedSeconds, theme, difficulty = 1 
         timeout: 45,
         shotCooldown: Math.max(0.38, 1.0 - difficulty * 0.08),
         bulletSpeed: 150 * speed,
+        shotPattern: midPattern,
+        fanCount: 5 + difficulty,
+        ringCount: 14 + difficulty * 2,
       }),
       {
         id: `${id}-4`,
@@ -129,6 +137,8 @@ export function createStage({ id, name, estimatedSeconds, theme, difficulty = 1 
         shotCooldown: Math.max(0.32, 0.82 - difficulty * 0.07),
         angleOffsetStep: Math.max(5, 13 - difficulty),
         bulletSpeed: 165 * speed,
+        shotPattern: difficulty >= 3 ? "lunarWave" : "doubleSpiral",
+        waveCount: 9 + difficulty,
       }),
       {
         id: `${id}-7`,
@@ -154,6 +164,9 @@ export function createStage({ id, name, estimatedSeconds, theme, difficulty = 1 
         timeout: 75,
         shotCooldown: Math.max(0.28, 0.78 - difficulty * 0.06),
         bulletSpeed: 175 * speed,
+        shotPattern: finalPattern,
+        ringCount: 18 + difficulty * 2,
+        waveCount: 10 + difficulty,
       }),
     ],
   };

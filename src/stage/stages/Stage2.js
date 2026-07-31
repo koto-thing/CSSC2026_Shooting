@@ -4,6 +4,6 @@ export const Stage2 = createStage({
   id: "stage-2",
   name: "霧の水路",
   estimatedSeconds: 420,
-  theme: "Wave lanes and crossed pressure",
+  theme: "lake",
   difficulty: 2,
 });

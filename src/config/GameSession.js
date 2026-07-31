@@ -13,6 +13,9 @@ export class GameSession {
     this.score = 0;
     this.graze = 0;
     this.elapsedSeconds = 0;
+    this.chapterAttempts = 1;
+    this.totalRetries = 0;
+    this.clearedChapters = 0;
   }
 
   get character() {
@@ -32,6 +35,22 @@ export class GameSession {
     this.score = 0;
     this.graze = 0;
     this.elapsedSeconds = 0;
+    this.chapterAttempts = 1;
+    this.totalRetries = 0;
+    this.clearedChapters = 0;
+  }
+
+  startChapter() {
+    this.chapterAttempts = 1;
+  }
+
+  retryChapter() {
+    this.chapterAttempts += 1;
+    this.totalRetries += 1;
+  }
+
+  clearChapter() {
+    this.clearedChapters += 1;
   }
 
   saveHighScore() {

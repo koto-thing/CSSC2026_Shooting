@@ -49,6 +49,7 @@ export class Enemy extends GameObject {
     this.maxHp = enemyType?.hp ?? 1;
     this.radius = radius;
     this.color = color;
+    this.isBoss = enemyType?.isBoss === true;
     this.shaderSurface = shaderSurface;
     this.fastVisual = fastVisual;
 

@@ -58,10 +58,10 @@ export class ChapterController {
 
   restartCurrentChapter() {
     this.snapshotRestorer?.(this.chapterSnapshot);
-    this.#startCurrentChapter();
+    this.#startCurrentChapter(true);
   }
 
-  #startCurrentChapter() {
+  #startCurrentChapter(isRetry = false) {
     this.chapterElapsed = 0;
     this.currentBoss = null;
     this.enemySpawner.reset();
@@ -81,6 +81,7 @@ export class ChapterController {
       chapter,
       stageIndex: this.stageIndex,
       chapterIndex: this.chapterIndex,
+      isRetry,
     });
   }
 

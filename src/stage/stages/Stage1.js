@@ -4,6 +4,6 @@ export const Stage1 = createStage({
   id: "stage-1",
   name: "星降る庭",
   estimatedSeconds: 390,
-  theme: "Basic movement and gentle aimed bullets",
+  theme: "forest",
   difficulty: 1,
 });
